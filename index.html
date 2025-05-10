@@ -3,413 +3,763 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ترتيب المستخدمين حسب التصويتات</title>
+    <title>RTM</title>
+    <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=G6CV7igLMdFPuuHjcBzSV615yn5sYDj1JSTMcUoe5o3rTbQHuA2NZGFwJ-lPKelp" charset="UTF-8"></script><script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #6c5ce7;
-            --secondary-color: #a29bfe;
-            --dark-color: #2d3436;
-            --darker-color: #1e272e;
-            --light-color: #f5f6fa;
-            --gold: #fdcb6e;
-            --silver: #dfe6e9;
-            --bronze: #e17055;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
-
-        body {
-            background-color: var(--darker-color);
-            color: var(--light-color);
-            padding: 20px;
+        
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.8s ease-out forwards;
         }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
-            font-size: 2.5rem;
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
         }
-
-        .leaderboard {
-            background-color: var(--dark-color);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        
+        .animate-slideInRight {
+            animation: slideInRight 0.6s ease-out forwards;
         }
-
-        .leaderboard-header {
-            display: flex;
-            background-color: var(--primary-color);
-            padding: 15px 20px;
-            font-weight: bold;
-            border-bottom: 2px solid var(--secondary-color);
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
         }
-
-        .leaderboard-header div {
-            flex: 1;
-            text-align: center;
-        }
-
-        .user {
-            display: flex;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            align-items: center;
-        }
-
-        .user:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .user div {
-            flex: 1;
-            text-align: center;
-        }
-
-        .rank {
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .name, .votes {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        input {
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--light-color);
-            padding: 8px 12px;
-            border-radius: 5px;
-            width: 80%;
-            text-align: center;
+        
+        .product-card {
             transition: all 0.3s ease;
         }
-
-        input:focus {
+        
+        .category-btn:hover {
+            background-color: #3b82f6;
+            transform: scale(1.05);
+        }
+        
+        .category-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .cart-item:hover {
+            background-color: #1f2937;
+        }
+        
+        .dark-overlay {
+            position: relative;
+        }
+        
+        .dark-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1;
+        }
+        
+        .dark-overlay > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        
+        .dropdown-menu {
+            display: none;
+        }
+        
+        .search-input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
         }
-
-        /* تنسيقات المراكز الثلاثة الأولى */
-        .first {
-            background: linear-gradient(135deg, rgba(253, 203, 110, 0.2), rgba(253, 203, 110, 0.05));
-            border-left: 5px solid var(--gold);
-        }
-
-        .second {
-            background: linear-gradient(135deg, rgba(223, 230, 233, 0.2), rgba(223, 230, 233, 0.05));
-            border-left: 5px solid var(--silver);
-        }
-
-        .third {
-            background: linear-gradient(135deg, rgba(225, 112, 85, 0.2), rgba(225, 112, 85, 0.05));
-            border-left: 5px solid var(--bronze);
-        }
-
-        .first .rank {
-            color: var(--gold);
-            font-size: 1.5rem;
-        }
-
-        .second .rank {
-            color: var(--silver);
-            font-size: 1.4rem;
-        }
-
-        .third .rank {
-            color: var(--bronze);
-            font-size: 1.3rem;
-        }
-
-        .top-three {
-            margin-bottom: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .other-users {
-            margin-top: 30px;
-        }
-
-        .other-users .user {
-            opacity: 0.9;
-        }
-
-        .other-users .user:hover {
-            opacity: 1;
-        }
-
-        .controls {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            margin: 0 10px;
-        }
-
-        button:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .instructions {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 5px;
-            border-right: 3px solid var(--primary-color);
-        }
-
-        .instructions h3 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .leaderboard-header {
-                font-size: 0.8rem;
-                padding: 10px 5px;
-            }
-            
-            .user {
-                padding: 10px 5px;
-                font-size: 0.9rem;
-            }
-            
-            input {
-                padding: 5px 8px;
-                font-size: 0.9rem;
-            }
+        
+        .scroll-hidden::-webkit-scrollbar {
+            display: none;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>ترتيب المستخدمين حسب التصويتات</h1>
+<body class="bg-gray-900 text-gray-200 font-sans">
+    <!-- Header -->
+    <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <a href="#" class="text-2xl font-bold text-blue-400 animate-pulse">RTM</a>
+                    <nav class="hidden md:flex space-x-6 space-x-reverse">
+                        <a href="#" class="hover:text-blue-400 transition">الرئيسية</a>
+                        <div class="dropdown relative">
+                            <button class="hover:text-blue-400 transition flex items-center">
+                                المنتجات <i class="fas fa-chevron-down mr-1 text-xs"></i>
+                            </button>
+                            <div class="dropdown-menu absolute hidden bg-gray-700 mt-2 py-2 w-48 rounded shadow-lg">
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-600">أجهزة الكمبيوتر</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-600">الهواتف الذكية</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-600">الأجهزة اللوحية</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-600">الملحقات</a>
+                            </div>
+                        </div>
+                        <a href="#" class="hover:text-blue-400 transition">العروض</a>
+                        <a href="#" class="hover:text-blue-400 transition">من نحن</a>
+                        <a href="#" class="hover:text-blue-400 transition">اتصل بنا</a>
+                    </nav>
+                </div>
+                
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <div class="relative hidden md:block">
+                        <input type="text" placeholder="ابحث عن منتج..." class="search-input bg-gray-700 px-4 py-2 rounded-full w-64 focus:ring-2 focus:ring-blue-500">
+                        <button class="absolute left-3 top-2 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="relative">
+                        <button id="cart-btn" class="relative p-2 hover:text-blue-400">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        </button>
+                        
+                        <!-- Cart Dropdown -->
+                        <div id="cart-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-gray-800 rounded-lg shadow-xl z-50 border border-gray-700">
+                            <div class="p-4 border-b border-gray-700">
+                                <h3 class="font-bold">سلة التسوق</h3>
+                            </div>
+                            <div class="max-h-96 overflow-y-auto scroll-hidden">
+                                <div class="cart-item p-3 border-b border-gray-700 flex items-center">
+                                    <img src="https://via.placeholder.com/60" alt="Product" class="w-16 h-16 object-cover rounded">
+                                    <div class="mr-3">
+                                        <h4 class="font-medium">لابتوب ديل XPS</h4>
+                                        <p class="text-sm text-gray-400">1 × $1200</p>
+                                    </div>
+                                    <button class="text-red-500 ml-auto">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="cart-item p-3 border-b border-gray-700 flex items-center">
+                                    <img src="https://via.placeholder.com/60" alt="Product" class="w-16 h-16 object-cover rounded">
+                                    <div class="mr-3">
+                                        <h4 class="font-medium">ماوس لاسلكي</h4>
+                                        <p class="text-sm text-gray-400">2 × $50</p>
+                                    </div>
+                                    <button class="text-red-500 ml-auto">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between mb-4">
+                                    <span>المجموع:</span>
+                                    <span class="font-bold">$1300</span>
+                                </div>
+                                <a href="#" class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-center transition">إتمام الشراء</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="md:hidden text-xl" id="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
         
-        <div class="leaderboard">
-            <div class="top-three">
-                <div class="leaderboard-header">
-                    <div class="rank">المركز</div>
-                    <div class="name">اسم المستخدم</div>
-                    <div class="votes">عدد التصويتات</div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden bg-gray-800 md:hidden">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex flex-col space-y-3">
+                    <a href="#" class="block py-2 hover:text-blue-400">الرئيسية</a>
+                    <div class="dropdown">
+                        <button class="w-full flex justify-between items-center py-2">
+                            <span>المنتجات</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu hidden pl-4 mt-1">
+                            <a href="#" class="block py-2 hover:text-blue-400">أجهزة الكمبيوتر</a>
+                            <a href="#" class="block py-2 hover:text-blue-400">الهواتف الذكية</a>
+                            <a href="#" class="block py-2 hover:text-blue-400">الأجهزة اللوحية</a>
+                            <a href="#" class="block py-2 hover:text-blue-400">الملحقات</a>
+                        </div>
+                    </div>
+                    <a href="#" class="block py-2 hover:text-blue-400">العروض</a>
+                    <a href="#" class="block py-2 hover:text-blue-400">من نحن</a>
+                    <a href="#" class="block py-2 hover:text-blue-400">اتصل بنا</a>
+                    <div class="relative pt-2">
+                        <input type="text" placeholder="ابحث عن منتج..." class="search-input bg-gray-700 px-4 py-2 rounded-full w-full focus:ring-2 focus:ring-blue-500">
+                        <button class="absolute left-3 top-4 text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="dark-overlay bg-[url('https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center py-32">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fadeIn">أحدث الأجهزة التقنية بأسعار منافسة</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto animate-fadeIn" style="animation-delay: 0.2s">اكتشف أحدث المنتجات التقنية مع خصومات تصل إلى 30% على مجموعة مختارة من الأجهزة</p>
+            <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-bold transition animate-fadeIn" style="animation-delay: 0.4s">تسوق الآن</a>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="py-12 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center animate-slideInRight">تصفح حسب الفئة</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="#" class="category-btn bg-gray-700 p-6 rounded-lg text-center hover:shadow-lg">
+                    <div class="text-blue-400 text-4xl mb-3">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <h3 class="font-bold">أجهزة الكمبيوتر</h3>
+                    <p class="text-sm text-gray-400 mt-1">24 منتج</p>
+                </a>
+                <a href="#" class="category-btn bg-gray-700 p-6 rounded-lg text-center hover:shadow-lg">
+                    <div class="text-blue-400 text-4xl mb-3">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="font-bold">الهواتف الذكية</h3>
+                    <p class="text-sm text-gray-400 mt-1">18 منتج</p>
+                </a>
+                <a href="#" class="category-btn bg-gray-700 p-6 rounded-lg text-center hover:shadow-lg">
+                    <div class="text-blue-400 text-4xl mb-3">
+                        <i class="fas fa-tablet-alt"></i>
+                    </div>
+                    <h3 class="font-bold">الأجهزة اللوحية</h3>
+                    <p class="text-sm text-gray-400 mt-1">12 منتج</p>
+                </a>
+                <a href="#" class="category-btn bg-gray-700 p-6 rounded-lg text-center hover:shadow-lg">
+                    <div class="text-blue-400 text-4xl mb-3">
+                        <i class="fas fa-headphones"></i>
+                    </div>
+                    <h3 class="font-bold">الملحقات</h3>
+                    <p class="text-sm text-gray-400 mt-1">36 منتج</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">منتجات مميزة</h2>
+                <a href="#" class="text-blue-400 hover:underline">عرض الكل</a>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Product 1 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/Ssgrfh4L/image.jpg" alt="Laptop" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">خصم 15%</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">لابتوب ديل XPS 15</h3>
+                                <p class="text-gray-400 text-sm">شاشة 15.6 بوصة، معالج i7</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.8</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">1,499 د.أ</span>
+                                <span class="text-blue-400 font-bold text-xl">1,294 د.أ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- المستخدم الأول -->
-                <div class="user first" id="user1">
-                    <div class="rank">1</div>
-                    <div class="name"><input type="text" value="محمد" class="name-input"></div>
-                    <div class="votes"><input type="number" value="125" class="votes-input"></div>
+                <!-- Product 2 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/ryShPvJk/14.jpg"iPhone" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">آيفون 14 برو ماكس</h3>
+                                <p class="text-gray-400 text-sm">256GB، شاشة 6.7 بوصة</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.9</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-400 font-bold text-xl">679 د.أ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- المستخدم الثاني -->
-                <div class="user second" id="user2">
-                    <div class="rank">2</div>
-                    <div class="name"><input type="text" value="أحمد" class="name-input"></div>
-                    <div class="votes"><input type="number" value="98" class="votes-input"></div>
+                <!-- Product 3 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/vBPmYP7H/image.jpg" alt="iPad" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">جديد</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">آيباد برو 12.9</h3>
+                                <p class="text-gray-400 text-sm">جيل 6، 128GB</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.7</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-400 font-bold text-xl">$549 د.أ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- المستخدم الثالث -->
-                <div class="user third" id="user3">
-                    <div class="rank">3</div>
-                    <div class="name"><input type="text" value="علي" class="name-input"></div>
-                    <div class="votes"><input type="number" value="75" class="votes-input"></div>
+                <!-- Product 4 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/m21r4yPB/image.jpg" alt="Headphones" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">سماعات سوني WH-1000XM4</h3>
+                                <p class="text-gray-400 text-sm">إلغاء الضوضاء</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.8</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">290 د.أ</span>
+                                <span class="text-blue-400 font-bold text-xl">249 د.أ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Offer -->
+    <section class="py-12 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="bg-gradient-to-r from-blue-900 to-gray-900 rounded-xl overflow-hidden">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                        <span class="text-blue-400 font-bold mb-2">عرض خاص محدود الوقت</span>
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">خصم 20% على جميع أجهزة اللابتوب</h2>
+                        <p class="text-gray-300 mb-6">استفد من هذا العرض المميز على مجموعة مختارة من أجهزة اللابتوب حتى نهاية الشهر.</p>
+                        <div class="flex items-center mb-6">
+                            <div class="text-center mr-4">
+                                <span class="text-2xl font-bold text-blue-400" id="days">03</span>
+                                <span class="block text-xs text-gray-400">أيام</span>
+                            </div>
+                            <div class="text-center mr-4">
+                                <span class="text-2xl font-bold text-blue-400" id="hours">12</span>
+                                <span class="block text-xs text-gray-400">ساعات</span>
+                            </div>
+                            <div class="text-center mr-4">
+                                <span class="text-2xl font-bold text-blue-400" id="minutes">49</span>
+                                <span class="block text-xs text-gray-400">دقائق</span>
+                            </div>
+                            <div class="text-center">
+                                <span class="text-2xl font-bold text-blue-400" id="seconds">22</span>
+                                <span class="block text-xs text-gray-400">ثواني</span>
+                            </div>
+                        </div>
+                        <a href="#" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold transition w-fit">استفد من العرض</a>
+                    </div>
+                    <div class="md:w-1/2">
+                        <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1626&q=80" alt="Special Offer" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- More Products -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">أحدث المنتجات</h2>
+                <div class="flex space-x-2 space-x-reverse">
+                    <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded transition">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="bg-gray-700 hover:bg-gray-600 p-2 rounded transition">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                 </div>
             </div>
             
-            <div class="other-users">
-                <div class="leaderboard-header">
-                    <div class="rank">المركز</div>
-                    <div class="name">اسم المستخدم</div>
-                    <div class="votes">عدد التصويتات</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Product 5 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/7ZqG10fV/2.jpg" alt="MacBook" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">ماك بوك برو M2</h3>
+                                <p class="text-gray-400 text-sm">13 بوصة، 512GB</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.9</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-400 font-bold text-xl">1,299 دأ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- المستخدمين من 4 إلى 10 -->
-                <div class="user" id="user4">
-                    <div class="rank">4</div>
-                    <div class="name"><input type="text" value="فاطمة" class="name-input"></div>
-                    <div class="votes"><input type="number" value="64" class="votes-input"></div>
+                <!-- Product 6 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/wBBqWCsx/S23.jpg" alt="Samsung Phone" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">جديد</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">سامسونج جالاكسي S23</h3>
+                                <p class="text-gray-400 text-sm">256GB، شاشة 6.1 بوصة</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.7</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-400 font-bold text-xl">250 د.أ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="user" id="user5">
-                    <div class="rank">5</div>
-                    <div class="name"><input type="text" value="يوسف" class="name-input"></div>
-                    <div class="votes"><input type="number" value="52" class="votes-input"></div>
+                <!-- Product 7 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/qMkvh6MC/Apple-Watch-Ultra.jpg" alt="Smart Watch" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">Apple Watch Ultra</h3>
+                                <p class="text-gray-400 text-sm">GPS + Cellular</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.6</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-blue-400 font-bold text-xl">429 د.أ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="user" id="user6">
-                    <div class="rank">6</div>
-                    <div class="name"><input type="text" value="خالد" class="name-input"></div>
-                    <div class="votes"><input type="number" value="48" class="votes-input"></div>
-                </div>
-                
-                <div class="user" id="user7">
-                    <div class="rank">7</div>
-                    <div class="name"><input type="text" value="نور" class="name-input"></div>
-                    <div class="votes"><input type="number" value="36" class="votes-input"></div>
-                </div>
-                
-                <div class="user" id="user8">
-                    <div class="rank">8</div>
-                    <div class="name"><input type="text" value="مريم" class="name-input"></div>
-                    <div class="votes"><input type="number" value="29" class="votes-input"></div>
-                </div>
-                
-                <div class="user" id="user9">
-                    <div class="rank">9</div>
-                    <div class="name"><input type="text" value="سعيد" class="name-input"></div>
-                    <div class="votes"><input type="number" value="18" class="votes-input"></div>
-                </div>
-                
-                <div class="user" id="user10">
-                    <div class="rank">10</div>
-                    <div class="name"><input type="text" value="حسن" class="name-input"></div>
-                    <div class="votes"><input type="number" value="12" class="votes-input"></div>
+                <!-- Product 8 -->
+                <div class="product-card bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative">
+                        <img src="https://i.postimg.cc/bJ8KCb5x/image.jpg" alt="Keyboard" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">خصم 25%</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">لوحة مفاتيح ميكانيكية</h3>
+                                <p class="text-gray-400 text-sm">RGB، مفاتيح بنية</p>
+                            </div>
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <span class="text-white ml-1">4.5</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">120 د.أ</span>
+                                <span class="text-blue-400 font-bold text-xl">90 د.أ</span>
+                            </div>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="controls">
-            <button id="updateBtn">تحديث الترتيب</button>
-            <button id="resetBtn">إعادة تعيين</button>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-12 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-8 text-center">آراء عملائنا</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-700 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center text-yellow-400 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">منذ 3 أيام</span>
+                    </div>
+                    <p class="mb-4">تجربة تسوق رائعة، المنتج وصل في الوقت المحدد وكان مطابقًا تمامًا للوصف. شكرًا لكم!</p>
+                    <div class="flex items-center">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Customer" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <h4 class="font-bold">أحمد محمد</h4>
+                            <p class="text-sm text-gray-400">عميل منذ 2021</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-700 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center text-yellow-400 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">منذ أسبوع</span>
+                    </div>
+                    <p class="mb-4">المنتج ممتاز ولكن التأخير في الشحن كان طويلًا بعض الشيء. بخلاف ذلك كل شيء كان جيدًا.</p>
+                    <div class="flex items-center">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Customer" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <h4 class="font-bold">سارة عبدالله</h4>
+                            <p class="text-sm text-gray-400">عميل جديد</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-700 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center text-yellow-400 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-sm text-gray-300">منذ شهر</span>
+                    </div>
+                    <p class="mb-4">أفضل متجر إلكتروني اشتريت منه، الدعم الفني ممتاز والمنتجات أصلية بضماناتها. أنصح الجميع به.</p>
+                    <div class="flex items-center">
+                        <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Customer" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <h4 class="font-bold">خالد سعيد</h4>
+                            <p class="text-sm text-gray-400">عميل منذ 2020</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="instructions">
-            <h3>كيفية الاستخدام:</h3>
-            <p>1. يمكنك تعديل أسماء المستخدمين وعدد التصويتات مباشرة من الحقول النصية.</p>
-            <p>2. اضغط على زر "تحديث الترتيب" لإعادة ترتيب المستخدمين حسب عدد التصويتات.</p>
-            <p>3. اضغط على زر "إعادة تعيين" لاستعادة القيم الافتراضية.</p>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="bg-gray-800 rounded-xl p-8 md:p-12 text-center">
+                <h2 class="text-3xl font-bold mb-4">اشترك في نشرتنا البريدية</h2>
+                <p class="max-w-2xl mx-auto mb-6">احصل على آخر العروض والتخفيضات مباشرة إلى بريدك الإلكتروني. كن أول من يعرف عن المنتجات الجديدة والعروض الحصرية.</p>
+                <div class="flex flex-col sm:flex-row max-w-md mx-auto">
+                    <input type="email" placeholder="بريدك الإلكتروني" class="bg-gray-700 px-4 py-3 rounded-full sm:rounded-r-none mb-2 sm:mb-0 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full sm:rounded-l-none font-bold transition whitespace-nowrap">اشترك الآن</button>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">RTM</h3>
+                    <p class="text-gray-400">نقدم لكم أحدث المنتجات التقنية بأفضل الأسعار وضمان على جميع المنتجات.</p>
+                    <div class="flex space-x-4 space-x-reverse mt-4">
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-blue-400 transition"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">روابط سريعة</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">الرئيسية</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">المنتجات</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">العروض</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">من نحن</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">اتصل بنا</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">خدمة العملاء</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">حسابي</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">تتبع الطلب</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">سياسة الإرجاع</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">الأسئلة الشائعة</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">الشروط والأحكام</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">اتصل بنا</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-2 text-blue-400"></i>
+                            <span>الاردن</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone-alt mr-2 text-blue-400"></i>
+                            <span>+962775955336</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-blue-400"></i>
+                            <span>athamnahzaid@gmail.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-6 border-t border-gray-700 text-center text-gray-400">
+                <p>© 2025 متجر RTM. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const updateBtn = document.getElementById('updateBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const users = Array.from(document.querySelectorAll('.user')).map(user => ({
-                element: user,
-                name: user.querySelector('.name-input').value,
-                votes: parseInt(user.querySelector('.votes-input').value),
-                rank: parseInt(user.querySelector('.rank').textContent)
-            }));
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Cart dropdown toggle
+        const cartBtn = document.getElementById('cart-btn');
+        const cartDropdown = document.getElementById('cart-dropdown');
+        
+        cartBtn.addEventListener('click', () => {
+            cartDropdown.classList.toggle('hidden');
+        });
+        
+        // Dropdown menus
+        const dropdowns = document.querySelectorAll('.dropdown');
+        
+        dropdowns.forEach(dropdown => {
+            const button = dropdown.querySelector('button');
+            const menu = dropdown.querySelector('.dropdown-menu');
             
-            // تحديث الترتيب حسب التصويتات
-            function updateRanking() {
-                // جمع بيانات المستخدمين
-                const updatedUsers = Array.from(document.querySelectorAll('.user')).map(user => ({
-                    element: user,
-                    name: user.querySelector('.name-input').value,
-                    votes: parseInt(user.querySelector('.votes-input').value),
-                    currentRank: parseInt(user.querySelector('.rank').textContent)
-                }));
-                
-                // ترتيب المستخدمين حسب التصويتات (تنازلياً)
-                updatedUsers.sort((a, b) => b.votes - a.votes);
-                
-                // فصل أفضل 3 مستخدمين عن الباقي
-                const topThree = updatedUsers.slice(0, 3);
-                const others = updatedUsers.slice(3);
-                
-                // تحديث واجهة المستخدم
-                updateUserElements(topThree, 'top-three');
-                updateUserElements(others, 'others');
-                
-                // إعادة تطبيق الفئات للمراكز الثلاثة الأولى
-                applyTopThreeClasses();
-            }
+            button.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+        });
+        
+        // Countdown timer
+        function updateCountdown() {
+            const now = new Date();
+            const endDate = new Date();
+            endDate.setDate(now.getDate() + 3); // 3 days from now
             
-            function updateUserElements(users, group) {
-                const container = group === 'top-three' ? 
-                    document.querySelector('.top-three') : 
-                    document.querySelector('.other-users');
-                
-                // إزالة جميع المستخدمين الحاليين
-                const currentUsers = container.querySelectorAll('.user');
-                currentUsers.forEach(user => {
-                    if (!user.id.includes('header')) {
-                        user.remove();
-                    }
-                });
-                
-                // إضافة المستخدمين بالترتيب الجديد
-                users.forEach((user, index) => {
-                    const rank = group === 'top-three' ? index + 1 : index + 4;
-                    user.element.querySelector('.rank').textContent = rank;
-                    container.appendChild(user.element);
-                });
-            }
+            const diff = endDate - now;
             
-            function applyTopThreeClasses() {
-                // إزالة جميع الفئات أولاً
-                document.querySelectorAll('.user').forEach(user => {
-                    user.classList.remove('first', 'second', 'third');
-                });
-                
-                // إضافة الفئات للمراكز الثلاثة الأولى
-                const topUsers = document.querySelectorAll('.top-three .user:not(.leaderboard-header)');
-                topUsers[0].classList.add('first');
-                topUsers[1].classList.add('second');
-                topUsers[2].classList.add('third');
-            }
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
             
-            // إعادة تعيين إلى القيم الافتراضية
-            function resetToDefault() {
-                const defaultData = [
-                    { name: 'محمد', votes: 125 },
-                    { name: 'أحمد', votes: 98 },
-                    { name: 'علي', votes: 75 },
-                    { name: 'فاطمة', votes: 64 },
-                    { name: 'يوسف', votes: 52 },
-                    { name: 'خالد', votes: 48 },
-                    { name: 'نور', votes: 36 },
-                    { name: 'مريم', votes: 29 },
-                    { name: 'سعيد', votes: 18 },
-                    { name: 'حسن', votes: 12 }
-                ];
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+        
+        // Add to cart animation
+        const addToCartButtons = document.querySelectorAll('.product-card button');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const cartCount = document.querySelector('#cart-btn span');
+                let count = parseInt(cartCount.textContent);
+                cartCount.textContent = count + 1;
                 
-                const userElements = document.querySelectorAll('.user:not(.leaderboard-header)');
-                userElements.forEach((user, index) => {
-                    user.querySelector('.name-input').value = defaultData[index].name;
-                    user.querySelector('.votes-input').value = defaultData[index].votes;
-                });
-                
-                updateRanking();
-            }
-            
-            // أحداث الأزرار
-            updateBtn.addEventListener('click', updateRanking);
-            resetBtn.addEventListener('click', resetToDefault);
-            
-            // يمكنك أيضاً تحديث الترتيب تلقائياً عند تغيير عدد التصويتات
-            document.querySelectorAll('.votes-input').forEach(input => {
-                input.addEventListener('change', updateRanking);
+                // Animation
+                cartCount.classList.add('animate-bounce');
+                setTimeout(() => {
+                    cartCount.classList.remove('animate-bounce');
+                }, 1000);
             });
         });
     </script>
